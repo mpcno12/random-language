@@ -1,5 +1,6 @@
+[package]
+name = "random_language"
+version = "0.1.0"
+edition = "2024"
 
-
-[workspace]
-resolver = "3"
-members = [ "language_compiler","language_lexer", "language_parser", "language_tester"]
+[dependencies]

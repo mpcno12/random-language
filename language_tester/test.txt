@@ -1,4 +1,0 @@
-let int x = 10;
-func add(int x, int y):
-    return x + y;
-add(x, 10);    
