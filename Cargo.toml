@@ -1,9 +1,5 @@
+
+
 [workspace]
 resolver = "3"
-members = [ "language-compiler","language-lexer", "language-parser"]
-
-[package]
-name = "random-language"
-edition = "2024"
-
-[workspace.lints.rust]
+members = [ "language_compiler","language_lexer", "language_parser", "language_tester"]
