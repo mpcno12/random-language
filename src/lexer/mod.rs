@@ -83,8 +83,11 @@ pub mod lexer {
 
     #[derive(Debug, Default)]
     pub enum TokenKind {
-        #[default] Ignore, // Whitespace & Comments & Start
+        #[default] Ignore, // Start
         Operator(Operators),
+        // Todo: Figure this out
+        // Only reason its avaliable is because its important
+        Type,
         Number(i64),
         Identifier(String),
         String(String),
@@ -170,6 +173,44 @@ pub mod lexer {
             let source = String::from_utf8(buf).expect("Invalid Source Code; Not UTF-8 Valid");
             if source.is_empty() {return Err(ParsingError::EmptyFile)};
             let search = Regex::new(REGEX_PATTERN)?;
+            let mut token_kinds: Vec<TokenKind> = Vec::new();
+            for caps in search.captures_iter(&source) {
+                token_kinds.push(match () {
+                    _ if matches!(caps.name("WHITESPACE"), m) => TokenKind::Ignore,
+                    _ if matches!(caps.name("COMMENT"), m) => TokenKind::Ignore,
+                    _ if matches!(caps.name("DEFINE"), m) => TokenKind::Keyword(Keywords::Define),
+                    _ if matches!(caps.name("MUTABLE"), m) => TokenKind::Keyword(Keywords::Mutable),
+                    _ if matches!(caps.name("FUNCTION"), m) => TokenKind::Keyword(Keywords::Function),
+                    _ if matches!(caps.name("IF"), m) => TokenKind::Keyword(Keywords::If),
+                    _ if matches!(caps.name("ELSE"), m) => TokenKind::Keyword(Keywords::Else),
+                    _ if matches!(caps.name("WHILE"), m) => TokenKind::Keyword(Keywords::While),
+                    _ if matches!(caps.name("PUBLICITY"), m) => TokenKind::Keyword(Keywords::Publicity),
+                    _ if matches!(caps.name("NULL"), m) => TokenKind::Type,
+                    _ if matches!(caps.name("RETURN"), m) => TokenKind::Operator(Operators::Return),
+                    // Replace 0 with the actual number later
+                    _ if matches!(caps.name("NUMBER"), m) => TokenKind::Number(0),
+                    // Replace "" with actual Identifier Later
+                    _ if matches!(caps.name("IDENTIFIER"), m) => TokenKind::Identifier("".to_string()),
+                    _ if matches!(caps.name("STRING"), m) => TokenKind::String("".to_string()),
+                    _ if matches!(caps.name("EQ"), m) => TokenKind::Operator(Operators::Eq),
+                    _ if matches!(caps.name("NE"), m) => TokenKind::Operator(Operators::Ne),
+                    _ if matches!(caps.name("POWER"), m) => TokenKind::Operator(Operators::Power),
+                    _ if matches!(caps.name("ASSIGN"), m) => TokenKind::Operator(Operators::Assign),
+                    _ if matches!(caps.name("ADD"), m) => TokenKind::Operator(Operators::Add),
+                    _ if matches!(caps.name("SUBTRACT"), m) => TokenKind::Operator(Operators::Subtract),
+                    _ if matches!(caps.name("ASTERISK"), m) => TokenKind::Operator(Operators::Asterisk),
+                    _ if matches!(caps.name("DIVIDE"), m) => TokenKind::Operator(Operators::Divide),
+                    _ if matches!(caps.name("OPENPAREN"), m) => TokenKind::Operator(Operators::OpenPara),
+                    _ if matches!(caps.name("CLOSEPAREN"), m) => TokenKind::Operator(Operators::ClosePara),
+                    _ if matches!(caps.name("OPENBRACE"), m) => TokenKind::Operator(Operators::OpenBrace),
+                    _ if matches!(caps.name("CLOSEBRACE"), m) => TokenKind::Operator(Operators::CloseBrace),
+                    _ if matches!(caps.name("OPENBRACKET"), m) => TokenKind::Operator(Operators::OpenBracket),
+                    _ if matches!(caps.name("CLOSEBRACKET"), m) => TokenKind::Operator(Operators::CloseBracket),
+                    _ if matches!(caps.name("ENDLINE"), m) => TokenKind::Operator(Operators::EndLine),
+                    () => todo!()
+                });
+            };
+            println!("{:#?}", token_kinds);
             todo!()
         }
 
