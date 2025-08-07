@@ -1,4 +1,4 @@
-#![allow(dead_code)] // To gett the compiler to shut up.
+#![allow(dead_code)] // To get the compiler to shut up.
 pub mod lexer {
     use {
         regex::Regex,
