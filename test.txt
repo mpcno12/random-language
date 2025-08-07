@@ -2,3 +2,22 @@
 // this is a comment
 let mut func if else while public private interface null return 0123456789 
 identifier "string" == != ** = ! - * / () [] {} ;                
+
+fn main() {
+    let presents = [
+        "A song and a Christmas tree",
+        "Two candy canes",
+        "Three boughs of holly",
+    ];
+
+    let mut current_presents = Vec::new();
+
+    for day in presents {
+        current_presents.push(presents[day]);
+        println!(
+            "On the {} day of Christmas my good friends brought to me",
+            day + 1
+        );
+        println!("{current_presents} /n");
+    }
+}
