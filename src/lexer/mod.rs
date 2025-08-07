@@ -10,9 +10,6 @@ pub mod lexer {
     };
 
     const REGEX_PATTERN: &'static str = concat!(
-        r#"\A"#,
-        r#"(?P<WHITESPACE>\s+)|"#,
-        r#"(?P<COMMENT>//[^\n]*)|"#,
         r#"(?P<DEFINE>let)|"#,
         r#"(?P<MUTABLE>mut)|"#,
         r#"(?P<FUNCTION>func)|"#,
@@ -40,6 +37,8 @@ pub mod lexer {
         r#"(?P<OPENBRACE>\[)|"#,
         r#"(?P<CLOSEBRACE>\])|"#,
         r#"(?P<ENDLINE>;)"#,
+        r#"(?P<WHITESPACE>\s+)|"#,
+        r#"(?P<COMMENT>//[^\n]*)|"#,
         r#"(?i)"#
     );
 
@@ -53,8 +52,8 @@ pub mod lexer {
         Asterisk,     // * , represents both pointers and multiplication operations
         Divide,       // (divider) /
         Power,        // **
-        OpenPara,     // (
-        ClosePara,    // )
+        OpenParen,     // (
+        CloseParen,    // )
         Return,       // ->
         OpenBracket,  // {
         CloseBracket, // }
@@ -191,128 +190,129 @@ pub mod lexer {
             let mut tokens: Vec<Token> = Vec::new();
             for caps in search.captures_iter(&source) {
                 tokens.push(match () {
-                    _ if matches!(caps.name("WHITESPACE"), _) => Self {
-                        kind: TokenKind::Ignore,
-                        text: String::default(),
-                    },
-                    _ if matches!(caps.name("COMMENT"), _) => Self {
-                        kind: TokenKind::Ignore,
-                        text: caps.name("COMMENT").unwrap().as_str().to_string(),
-                    },
-                    _ if matches!(caps.name("DEFINE"), _) => Self {
+                    
+                    _ if matches!(caps.name("DEFINE"), Some(_)) => Self {
                         kind: TokenKind::Keyword(Keywords::Define),
                         text: "let".to_string(),
                     },
-                    _ if matches!(caps.name("MUTABLE"), _) => Self {
+                    _ if matches!(caps.name("MUTABLE"), Some(_)) => Self {
                         kind: TokenKind::Keyword(Keywords::Mutable),
                         text: "mut".to_string(),
                     },
-                    _ if matches!(caps.name("FUNCTION"), _) => Self {
+                    _ if matches!(caps.name("FUNCTION"), Some(_)) => Self {
                         kind: TokenKind::Keyword(Keywords::Function),
                         text: "func".to_string(),
                     },
-                    _ if matches!(caps.name("IF"), _) => Self {
+                    _ if matches!(caps.name("IF"), Some(_)) => Self {
                         kind: TokenKind::Keyword(Keywords::If),
                         text: "if".to_string(),
                     },
-                    _ if matches!(caps.name("ELSE"), _) => Self {
+                    _ if matches!(caps.name("ELSE"), Some(_)) => Self {
                         kind: TokenKind::Keyword(Keywords::Else),
                         text: "else".to_string(),
                     },
-                    _ if matches!(caps.name("WHILE"), _) => Self {
+                    _ if matches!(caps.name("WHILE"), Some(_)) => Self {
                         kind: TokenKind::Keyword(Keywords::While),
                         text: "while".to_string(),
                     },
-                    _ if matches!(caps.name("PUBLICITY"), _) => Self {
+                    _ if matches!(caps.name("PUBLICITY"), Some(_)) => Self {
                         kind: TokenKind::Keyword(Keywords::Publicity),
                         text: caps.name("PUBLICITY").unwrap().as_str().to_string(),
                     },
-                    _ if matches!(caps.name("NULL"), _) => Self {
+                    _ if matches!(caps.name("NULL"), Some(_)) => Self {
                         kind: TokenKind::Type,
-                        text: "null".to_string(),
+                        text: caps.name("NULL").unwrap().as_str().to_string(),
                     },
-                    _ if matches!(caps.name("RETURN"), _) => Self {
+                    _ if matches!(caps.name("RETURN"), Some(_)) => Self {
                         kind: TokenKind::Operator(Operators::Return),
                         text: "return".to_string(),
                     },
 
-                    _ if matches!(caps.name("NUMBER"), _) => Self {
+                    _ if matches!(caps.name("NUMBER"), Some(_)) => Self {
                         kind: TokenKind::Number(
                             caps.name("NUMBER").unwrap().as_str().parse().unwrap(),
                         ),
                         text: caps.name("NUMBER").unwrap().as_str().to_string(),
                     },
-                    _ if matches!(caps.name("IDENTIFIER"), _) => Self {
+                    _ if matches!(caps.name("IDENTIFIER"), Some(_)) => Self {
                         kind: TokenKind::Identifier(
                             caps.name("IDENTIFIER").unwrap().as_str().to_string(),
                         ),
                         text: caps.name("IDENTIFIER").unwrap().as_str().to_string(),
                     },
-                    _ if matches!(caps.name("STRING"), _) => Self {
+                    _ if matches!(caps.name("STRING"), Some(_)) => Self {
                         kind: TokenKind::String(caps.name("STRING").unwrap().as_str().to_string()),
                         text: caps.name("STRING").unwrap().as_str().to_string(),
                     },
-                    _ if matches!(caps.name("EQ"), _) => Self {
+                    _ if matches!(caps.name("EQ"), Some(_)) => Self {
                         kind: TokenKind::Operator(Operators::Eq),
                         text: "==".to_string(),
                     },
-                    _ if matches!(caps.name("NE"), _) => Self {
+                    _ if matches!(caps.name("NE"), Some(_)) => Self {
                         kind: TokenKind::Operator(Operators::Ne),
                         text: "!=".to_string(),
                     },
-                    _ if matches!(caps.name("POWER"), _) => Self {
+                    _ if matches!(caps.name("POWER"), Some(_)) => Self {
                         kind: TokenKind::Operator(Operators::Power),
                         text: "**".to_string(),
                     },
-                    _ if matches!(caps.name("ASSIGN"), _) => Self {
+                    _ if matches!(caps.name("ASSIGN"), Some(_)) => Self {
                         kind: TokenKind::Operator(Operators::Assign),
                         text: "=".to_string(),
                     },
-                    _ if matches!(caps.name("ADD"), _) => Self {
+                    _ if matches!(caps.name("ADD"), Some(_)) => Self {
                         kind: TokenKind::Operator(Operators::Add),
                         text: "+".to_string(),
                     },
-                    _ if matches!(caps.name("SUBTRACT"), _) => Self {
+                    _ if matches!(caps.name("SUBTRACT"), Some(_)) => Self {
                         kind: TokenKind::Operator(Operators::Subtract),
                         text: "-".to_string(),
                     },
-                    _ if matches!(caps.name("ASTERISK"), _) => Self {
+                    _ if matches!(caps.name("ASTERISK"), Some(_)) => Self {
                         kind: TokenKind::Operator(Operators::Asterisk),
                         text: "*".to_string(),
                     },
-                    _ if matches!(caps.name("DIVIDE"), _) => Self {
+                    _ if matches!(caps.name("DIVIDE"), Some(_)) => Self {
                         kind: TokenKind::Operator(Operators::Divide),
                         text: r"/".to_string(),
                     },
-                    _ if matches!(caps.name("OPENPAREN"), _) => Self {
-                        kind: TokenKind::Operator(Operators::OpenPara),
+                    _ if matches!(caps.name("OPENPAREN"), Some(_)) => Self {
+                        kind: TokenKind::Operator(Operators::OpenParen),
                         text: "(".to_string(),
                     },
-                    _ if matches!(caps.name("CLOSEPAREN"), _) => Self {
-                        kind: TokenKind::Operator(Operators::ClosePara),
+                    _ if matches!(caps.name("CLOSEPAREN"), Some(_)) => Self {
+                        kind: TokenKind::Operator(Operators::CloseParen),
                         text: ")".to_string(),
                     },
-                    _ if matches!(caps.name("OPENBRACE"), _) => Self {
+                    _ if matches!(caps.name("OPENBRACE"), Some(_)) => Self {
                         kind: TokenKind::Operator(Operators::OpenBrace),
                         text: "[".to_string(),
                     },
-                    _ if matches!(caps.name("CLOSEBRACE"), _) => Self {
+                    _ if matches!(caps.name("CLOSEBRACE"), Some(_)) => Self {
                         kind: TokenKind::Operator(Operators::CloseBrace),
                         text: "]".to_string(),
                     },
-                    _ if matches!(caps.name("OPENBRACKET"), _) => Self {
+                    _ if matches!(caps.name("OPENBRACKET"), Some(_)) => Self {
                         kind: TokenKind::Operator(Operators::OpenBracket),
                         text: "{".to_string(),
                     },
-                    _ if matches!(caps.name("CLOSEBRACKET"), _) => Self {
+                    _ if matches!(caps.name("CLOSEBRACKET"), Some(_)) => Self {
                         kind: TokenKind::Operator(Operators::CloseBracket),
                         text: "}".to_string(),
                     },
-                    _ if matches!(caps.name("ENDLINE"), _) => Self {
+                    _ if matches!(caps.name("ENDLINE"), Some(_)) => Self {
                         kind: TokenKind::Operator(Operators::EndLine),
                         text: ";".to_string(),
                     },
-                    () => unimplemented!(),
+                    _ if matches!(caps.name("WHITESPACE"), Some(_)) => Self {
+                        kind: TokenKind::Ignore,
+                        text: String::default(),
+                    },
+                    _ if matches!(caps.name("COMMENT"), Some(_)) => Self {
+                        kind: TokenKind::Ignore,
+                        text: caps.name("COMMENT").unwrap().as_str().to_string(),
+                    },
+                    () => panic!("wtf"),
                 });
             }
             println!("{:#?}", tokens);
