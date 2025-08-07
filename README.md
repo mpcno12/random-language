@@ -7,3 +7,4 @@ A compiled WIP coding language.
  3. Special Dynamic Type (takes the type of any input)
  4. Low Level Operations
  5. High Level Abstractions
+ 6. Case-insensitive Code Parsing
