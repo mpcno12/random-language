@@ -1,11 +1,12 @@
 mod lexer;
-use lexer::lexer::ParsingHead;
+use lexer::lexer::Token;
 
 use std::path::Path;
 
 
 fn main() {
-    let source = ParsingHead::parse_source(&Path::new("test.txt"));
+    let parsing_head = Token::new();
+    let source = Token::parse_source(parsing_head, &Path::new("test.txt"));
     match source {
         Ok(_) => {},
         Err(error) => panic!("{0}", error)

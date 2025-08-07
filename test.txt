@@ -1,4 +1,4 @@
-let int x = 10;
-func addi(int x, int y) -> int:
-    return x + y;
-let int value = addi(x, 10);    
+                 
+// this is a comment
+let mut func if else while public private interface null return 0123456789 
+identifier "string" == != ** = ! - * / () [] {} ;                

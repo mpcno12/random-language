@@ -1,10 +1,54 @@
-
+#![allow(dead_code)] // To gett the compiler to shut up.
 pub mod lexer {
-    use std::{char, fs::File, io::{self, Read}, path::Path};
+    use {
+        regex::Regex,
+        std::{
+            fs::File, 
+            io::{
+                self, 
+                Read
+            },
+            path::Path
+        }
+    };
+
+    const REGEX_PATTERN: &'static str = concat!(
+        r"\A(?P<WHITESPACE>\s+)|",
+        "(?P<COMMENT>//[^\n]*)|",
+        r"(?P<DEFINE>let)|",
+        r"(?P<MUTABLE>mut)|",
+        r"(?P<FUNCTION>func)|",
+        r"(?P<IF>if)|",
+        r"(?P<ELSE>else)|",
+        r"(?P<WHILE>while)|",
+        r"(?P<PUBLICITY>public|private|interface)|",
+        r"(?P<NULL>null)|",
+        r"(?P<RETURN>return)|",
+        r"(?P<NUMBER>\d+(\.\d+)?)|",
+        r"(?P<IDENTIFIER>[A-Za-z_][A-Za-z0-9_]*)|",
+        r#"(?P<STRING>\"(?:\\.|[^\"])*\")|"#,
+        r"(?P<EQ>==)|",
+        r"(?P<NE>!=)|",
+        r"(?P<POWER>\*\*)|",
+        r"(?P<ASSIGN>=)|",
+        r"(?P<ADD>\+)|",
+        r"(?P<SUBTRACT>-)|",
+        r"(?P<ASTERISK>\*)|",
+        r"(?P<DIVIDE>/)|",
+        r"(?P<OPENPAREN>\()|",
+        r"(?P<CLOSEPAREN>\))|",
+        r"(?P<OPENBRACKET>{)|",
+        r"(?P<CLOSEBRACKET>})|",
+        r"(?P<OPENBRACE>\[)|",
+        r"(?P<CLOSEBRACE>\])|",
+        r"(?P<ENDLINE>;)"
+    );
 
     #[derive(Debug)]
-    enum Operators {
+    pub enum Operators {
         Assign, // = 
+        Eq, // ==
+        Ne, // !=
         Add, // +
         Subtract, // -
         Asterisk, // * , represents both pointers and multiplication operations
@@ -18,37 +62,50 @@ pub mod lexer {
         OpenBrace, // [
         CloseBrace, // ]
         EndLine, // ;
-        Binary([char; 2]), // e.g. << , >> , | , & , etc...
+        // TODO: Figure this out.
+        // Binary([char; 2]), // e.g. << , >> , | , & , etc...
     }
 
     #[derive(Debug)]
-    enum Keywords {
-        Define,
-        Mutable,
-        Function,
-        Type(String),
-        Publicity,
-        Null,
-        Return,
+    pub enum Keywords {
+        Define, // let
+        Mutable, // mut
+        Function, // func
+        // Todo: Figure this out
+        // Type(String), // int, float, double
+        If, // if
+        Else, // else
+        While, // while
+        Publicity, // public, private, interface
+        Null, // null, (Regex has issues parsing this; divides null & ptr) nullptr
+        Return, // return
     }   
 
-    #[derive(Debug)]
-    pub enum Token {
+    #[derive(Debug, Default)]
+    pub enum TokenKind {
+        #[default] Ignore, // Whitespace & Comments & Start
         Operator(Operators),
-        Literal(String),
-        Keyword(Keywords)
+        Number(i64),
+        Identifier(String),
+        String(String),
+        Keyword(Keywords),
     }
 
-    #[derive(Debug)]
-    pub struct ParsingHead {
-        curr_char: char,
-        next_char: char,
+    #[derive(Debug, Default)]
+    pub struct Position {
         line: usize,
         column: usize,
     }
 
+    #[derive(Debug, Default)]
+    pub struct Token {
+        kind: TokenKind,
+        text: String,
+        position: Position
+    }
+
     #[derive(Debug)]
-    struct Mistake {
+    pub struct Mistake {
         written: String,
         potential: String,
         other_potentials: Vec<String>,
@@ -59,6 +116,8 @@ pub mod lexer {
         InvalidOperator(Mistake),
         InvalidKeyword(Mistake),
         IoError(io::Error),
+        RegexError(regex::Error),
+        EmptyFile
     }
 
     impl std::fmt::Display for ParsingError {
@@ -76,28 +135,44 @@ pub mod lexer {
                 }
                 Self::IoError(io_error) => {
                     writeln!(f, "{0}", io_error)?;
+                },
+                Self::RegexError(regex_error) => {
+                    writeln!(f, "{0}", regex_error)?;
+                },
+                Self::EmptyFile => {
+                    writeln!(f, "The file is currently empty, please add code")?;
                 }
             };
             return Ok(());
         }
     }
-
     impl From<io::Error> for ParsingError {
         fn from(value: io::Error) -> Self {
             return Self::IoError(value);
         }
     }
-
+    impl From<regex::Error> for ParsingError {
+        fn from(value: regex::Error) -> Self {
+            Self::RegexError(value)
+        }
+    }
     impl std::error::Error for ParsingError {}
 
-    impl ParsingHead {
-        pub fn parse_source(path: &Path) -> Result<Vec<Token>, ParsingError> {
-            let mut tokens: Vec<Token> = Vec::new();
+    impl Token {
+        pub fn new() -> Self {
+            Self::default()
+        }
+
+        pub fn parse_source(self, path: &Path) -> Result<Vec<Token>, ParsingError> {
             let mut file = File::open(path)?;
             let mut buf = Vec::new();
             file.read_to_end(&mut buf)?;
-            println!("{0:#?}", buf);
+            let source = String::from_utf8(buf).expect("Invalid Source Code; Not UTF-8 Valid");
+            if source.is_empty() {return Err(ParsingError::EmptyFile)};
+            let search = Regex::new(REGEX_PATTERN)?;
             todo!()
         }
+
+        fn regex_parser() {}
     }
 }
