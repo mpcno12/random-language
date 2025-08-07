@@ -8,3 +8,6 @@ A compiled WIP coding language.
  4. Low Level Operations
  5. High Level Abstractions
  6. Case-insensitive Code Parsing
+
+## Keywords (And definitions)
+1. 
