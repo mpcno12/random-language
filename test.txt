@@ -1,4 +1,5 @@
                  
 // this is a comment
-let mut func if else while public private interface null return 0123456789 
-identifier "string" == != ** = ! - * / () [] {} ;                
+                            
+Let mUT func if else WhIle public private INTERFACE nUll nullptr return 0123456789 iden "string" == != ** = + - * / () {} [] ;
+let mut func if else while public private interface null nullptr return 0123456789 iden "string" == != ** = + - * / () {} [] ;            

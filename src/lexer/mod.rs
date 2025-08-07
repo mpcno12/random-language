@@ -13,36 +13,38 @@ pub mod lexer {
     };
 
     const REGEX_PATTERN: &'static str = concat!(
-        r"\A(?P<WHITESPACE>\s+)|",
-        "(?P<COMMENT>//[^\n]*)|",
-        r"(?P<DEFINE>let)|",
-        r"(?P<MUTABLE>mut)|",
-        r"(?P<FUNCTION>func)|",
-        r"(?P<IF>if)|",
-        r"(?P<ELSE>else)|",
-        r"(?P<WHILE>while)|",
-        r"(?P<PUBLICITY>public|private|interface)|",
-        r"(?P<NULL>null)|",
-        r"(?P<RETURN>return)|",
-        r"(?P<NUMBER>\d+(\.\d+)?)|",
-        r"(?P<IDENTIFIER>[A-Za-z_][A-Za-z0-9_]*)|",
-        r#"(?P<STRING>\"(?:\\.|[^\"])*\")|"#,
-        r"(?P<EQ>==)|",
-        r"(?P<NE>!=)|",
-        r"(?P<POWER>\*\*)|",
-        r"(?P<ASSIGN>=)|",
-        r"(?P<ADD>\+)|",
-        r"(?P<SUBTRACT>-)|",
-        r"(?P<ASTERISK>\*)|",
-        r"(?P<DIVIDE>/)|",
-        r"(?P<OPENPAREN>\()|",
-        r"(?P<CLOSEPAREN>\))|",
-        r"(?P<OPENBRACKET>{)|",
-        r"(?P<CLOSEBRACKET>})|",
-        r"(?P<OPENBRACE>\[)|",
-        r"(?P<CLOSEBRACE>\])|",
-        r"(?P<ENDLINE>;)"
-    );
+    r#"\A"#,
+    r#"(?P<WHITESPACE>\s+)|"#,
+    r#"(?P<COMMENT>//[^\n]*)|"#,
+    r#"(?P<DEFINE>let)|"#,
+    r#"(?P<MUTABLE>mut)|"#,
+    r#"(?P<FUNCTION>func)|"#,
+    r#"(?P<IF>if)|"#,
+    r#"(?P<ELSE>else)|"#,
+    r#"(?P<WHILE>while)|"#,
+    r#"(?P<PUBLICITY>public|private|interface)|"#,
+    r#"(?P<NULL>nullptr|null)|"#,
+    r#"(?P<RETURN>return)|"#,
+    r#"(?P<NUMBER>\d+(\.\d+)?)|"#,
+    r#"(?P<STRING>"(?:\\.|[^"\\])*")|"#,
+    r#"(?P<IDENTIFIER>[A-Za-z_][A-Za-z0-9_]*)|"#,
+    r#"(?P<EQ>==)|"#,
+    r#"(?P<NE>!=)|"#,
+    r#"(?P<POWER>\*\*)|"#,
+    r#"(?P<ASSIGN>=)|"#,
+    r#"(?P<ADD>\+)|"#,
+    r#"(?P<SUBTRACT>-)|"#,
+    r#"(?P<ASTERISK>\*)|"#,
+    r#"(?P<DIVIDE>/)|"#,
+    r#"(?P<OPENPAREN>\()|"#,
+    r#"(?P<CLOSEPAREN>\))|"#,
+    r#"(?P<OPENBRACKET>\{)|"#,
+    r#"(?P<CLOSEBRACKET>\})|"#,
+    r#"(?P<OPENBRACE>\[)|"#,
+    r#"(?P<CLOSEBRACE>\])|"#,
+    r#"(?P<ENDLINE>;)"#,
+    r#"(?i)"# 
+);
 
     #[derive(Debug)]
     pub enum Operators {
@@ -104,7 +106,6 @@ pub mod lexer {
     pub struct Token {
         kind: TokenKind,
         text: String,
-        position: Position
     }
 
     #[derive(Debug)]
@@ -173,45 +174,54 @@ pub mod lexer {
             let source = String::from_utf8(buf).expect("Invalid Source Code; Not UTF-8 Valid");
             if source.is_empty() {return Err(ParsingError::EmptyFile)};
             let search = Regex::new(REGEX_PATTERN)?;
-            let mut token_kinds: Vec<TokenKind> = Vec::new();
+            let mut tokens: Vec<Token> = Vec::new();
             for caps in search.captures_iter(&source) {
-                token_kinds.push(match () {
-                    _ if matches!(caps.name("WHITESPACE"), m) => TokenKind::Ignore,
-                    _ if matches!(caps.name("COMMENT"), m) => TokenKind::Ignore,
-                    _ if matches!(caps.name("DEFINE"), m) => TokenKind::Keyword(Keywords::Define),
-                    _ if matches!(caps.name("MUTABLE"), m) => TokenKind::Keyword(Keywords::Mutable),
-                    _ if matches!(caps.name("FUNCTION"), m) => TokenKind::Keyword(Keywords::Function),
-                    _ if matches!(caps.name("IF"), m) => TokenKind::Keyword(Keywords::If),
-                    _ if matches!(caps.name("ELSE"), m) => TokenKind::Keyword(Keywords::Else),
-                    _ if matches!(caps.name("WHILE"), m) => TokenKind::Keyword(Keywords::While),
-                    _ if matches!(caps.name("PUBLICITY"), m) => TokenKind::Keyword(Keywords::Publicity),
-                    _ if matches!(caps.name("NULL"), m) => TokenKind::Type,
-                    _ if matches!(caps.name("RETURN"), m) => TokenKind::Operator(Operators::Return),
-                    // Replace 0 with the actual number later
-                    _ if matches!(caps.name("NUMBER"), m) => TokenKind::Number(0),
-                    // Replace "" with actual Identifier Later
-                    _ if matches!(caps.name("IDENTIFIER"), m) => TokenKind::Identifier("".to_string()),
-                    _ if matches!(caps.name("STRING"), m) => TokenKind::String("".to_string()),
-                    _ if matches!(caps.name("EQ"), m) => TokenKind::Operator(Operators::Eq),
-                    _ if matches!(caps.name("NE"), m) => TokenKind::Operator(Operators::Ne),
-                    _ if matches!(caps.name("POWER"), m) => TokenKind::Operator(Operators::Power),
-                    _ if matches!(caps.name("ASSIGN"), m) => TokenKind::Operator(Operators::Assign),
-                    _ if matches!(caps.name("ADD"), m) => TokenKind::Operator(Operators::Add),
-                    _ if matches!(caps.name("SUBTRACT"), m) => TokenKind::Operator(Operators::Subtract),
-                    _ if matches!(caps.name("ASTERISK"), m) => TokenKind::Operator(Operators::Asterisk),
-                    _ if matches!(caps.name("DIVIDE"), m) => TokenKind::Operator(Operators::Divide),
-                    _ if matches!(caps.name("OPENPAREN"), m) => TokenKind::Operator(Operators::OpenPara),
-                    _ if matches!(caps.name("CLOSEPAREN"), m) => TokenKind::Operator(Operators::ClosePara),
-                    _ if matches!(caps.name("OPENBRACE"), m) => TokenKind::Operator(Operators::OpenBrace),
-                    _ if matches!(caps.name("CLOSEBRACE"), m) => TokenKind::Operator(Operators::CloseBrace),
-                    _ if matches!(caps.name("OPENBRACKET"), m) => TokenKind::Operator(Operators::OpenBracket),
-                    _ if matches!(caps.name("CLOSEBRACKET"), m) => TokenKind::Operator(Operators::CloseBracket),
-                    _ if matches!(caps.name("ENDLINE"), m) => TokenKind::Operator(Operators::EndLine),
-                    () => todo!()
+                tokens.push(match () {
+                    _ if matches!(caps.name("WHITESPACE"), _) => {
+                            Self {
+                                kind: TokenKind::Ignore,
+                                text: String::default()
+                            }
+                        },
+                    _ if matches!(caps.name("COMMENT"), _) => {
+                        Self {
+                            kind: TokenKind::Ignore,
+                            text: caps.name("COMMENT").unwrap().as_str().to_string()
+                        }
+                    },
+                    _ if matches!(caps.name("DEFINE"), _) => {Self{kind: TokenKind::Keyword(Keywords::Define), text: "let".to_string()}},
+                    _ if matches!(caps.name("MUTABLE"), _) => {Self{kind: TokenKind::Keyword(Keywords::Mutable), text: "mut".to_string()}},
+                    _ if matches!(caps.name("FUNCTION"), _) => {Self{kind: TokenKind::Keyword(Keywords::Function), text: "func".to_string()}},
+                    _ if matches!(caps.name("IF"), _) => {Self{kind: TokenKind::Keyword(Keywords::If), text: "if".to_string()}}
+                    _ if matches!(caps.name("ELSE"), _) => {Self{kind: TokenKind::Keyword(Keywords::Else), text: "else".to_string()}}
+                    _ if matches!(caps.name("WHILE"), _) => {Self{kind: TokenKind::Keyword(Keywords::While), text: "while".to_string()}}
+                    _ if matches!(caps.name("PUBLICITY"), _) => {Self{kind: TokenKind::Keyword(Keywords::Publicity), text: caps.name("PUBLICITY").unwrap().as_str().to_string()}}
+                    _ if matches!(caps.name("NULL"), _) => {Self{kind: TokenKind::Type, text: "null".to_string()}}
+                    _ if matches!(caps.name("RETURN"), _) => {Self{kind: TokenKind::Operator(Operators::Return), text: "return".to_string()}}
+
+                    _ if matches!(caps.name("NUMBER"), _) => {Self{kind: TokenKind::Number(caps.name("NUMBER").unwrap().as_str().parse().unwrap()), text: caps.name("NUMBER").unwrap().as_str().to_string()}},
+                    _ if matches!(caps.name("IDENTIFIER"), _) => {Self{kind: TokenKind::Identifier(caps.name("IDENTIFIER").unwrap().as_str().to_string()), text: caps.name("IDENTIFIER").unwrap().as_str().to_string()}}
+                    _ if matches!(caps.name("STRING"), _) => {Self{kind: TokenKind::String(caps.name("STRING").unwrap().as_str().to_string()), text: caps.name("STRING").unwrap().as_str().to_string()}}
+                    _ if matches!(caps.name("EQ"), _) => {Self{kind: TokenKind::Operator(Operators::Eq), text: "==".to_string()}}
+                    _ if matches!(caps.name("NE"), _) => {Self{kind: TokenKind::Operator(Operators::Ne), text: "!=".to_string()}}
+                    _ if matches!(caps.name("POWER"), _) => {Self{kind: TokenKind::Operator(Operators::Power), text: "**".to_string()}}
+                    _ if matches!(caps.name("ASSIGN"), _) => {Self{kind: TokenKind::Operator(Operators::Assign), text: "=".to_string()}}
+                    _ if matches!(caps.name("ADD"), _) => {Self{kind: TokenKind::Operator(Operators::Add), text: "+".to_string()}}
+                    _ if matches!(caps.name("SUBTRACT"), _) => {Self{kind: TokenKind::Operator(Operators::Subtract), text: "-".to_string()}}
+                    _ if matches!(caps.name("ASTERISK"), _) => {Self{kind: TokenKind::Operator(Operators::Asterisk), text: "*".to_string()}}
+                    _ if matches!(caps.name("DIVIDE"), _) => {Self{kind: TokenKind::Operator(Operators::Divide), text: r"/".to_string()}}
+                    _ if matches!(caps.name("OPENPAREN"), _) => {Self{kind: TokenKind::Operator(Operators::OpenPara), text: "(".to_string()}}
+                    _ if matches!(caps.name("CLOSEPAREN"), _) => {Self{kind: TokenKind::Operator(Operators::ClosePara), text: ")".to_string()}}
+                    _ if matches!(caps.name("OPENBRACE"), _) => {Self{kind: TokenKind::Operator(Operators::OpenBrace), text: "[".to_string()}}
+                    _ if matches!(caps.name("CLOSEBRACE"), _) => {Self{kind: TokenKind::Operator(Operators::CloseBrace), text: "]".to_string()}}
+                    _ if matches!(caps.name("OPENBRACKET"), _) => {Self{kind: TokenKind::Operator(Operators::OpenBracket), text: "{".to_string()}}
+                    _ if matches!(caps.name("CLOSEBRACKET"), _) => {Self{kind: TokenKind::Operator(Operators::CloseBracket), text: "}".to_string()}}
+                    _ if matches!(caps.name("ENDLINE"), _) => {Self{kind: TokenKind::Operator(Operators::EndLine), text: ";".to_string()}}
+                    () => unimplemented!()
                 });
             };
-            println!("{:#?}", token_kinds);
-            todo!()
+            println!("{:#?}", tokens);
+            return Ok(tokens);
         }
 
         fn regex_parser() {}
