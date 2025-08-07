@@ -83,6 +83,7 @@ pub mod lexer {
     pub enum TokenKind {
         #[default]
         Ignore, // Start
+        Unknown, // I Dont know????
         Operator(Operators),
         // Todo: Figure this out
         // Only reason its avaliable is because its important
@@ -312,7 +313,10 @@ pub mod lexer {
                         kind: TokenKind::Ignore,
                         text: caps.name("COMMENT").unwrap().as_str().to_string(),
                     },
-                    () => panic!("wtf"),
+                    () => Self {
+                        kind: TokenKind::Unknown,
+                        text: "wtf".to_string()
+                    },
                 });
             }
             println!("{:#?}", tokens);
