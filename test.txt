@@ -2,3 +2,4 @@
                          n         
 Let mUT func if else WhIle public private INTERFACE nUll nullptr return 0123456789 iden "string" == != ** = + - * / () {} [] ;
 let mut func if else while public private interface null nullptr return 0123456789 iden "string" == != ** = + - * / () {} [] ;            
+letmutfuncifelsewhilepublicprivateinterfacenullnullptrreturn0123456789iden"string"==!=**=+-*/()[]{};
