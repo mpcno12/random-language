@@ -43,9 +43,9 @@ THIS IS A WORK IN PROGRESS! THERE ARE KNOWN ISSUES WITH TOKENIZATION ALONG WITH 
 
 
 ## Features Done being Made:
-[] - AoT Compilation
-[] - Statically Typed Language
-[] - Special Dynamically Typed Type
-[] - Low Level Operation
-[] - High Level Abstractions
-[x] - Case-insensitive Writing
+- [] - AoT Compilation
+- [] - Statically Typed Language
+- [] - Special Dynamically Typed Type
+- [] - Low Level Operation
+- [] - High Level Abstractions
+- [x] - Case-insensitive Writing
