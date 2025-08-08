@@ -10,6 +10,8 @@ pub mod lexer {
     };
 
     const REGEX_PATTERN: &'static str = concat!(
+        r#"(?mi)",
+        r#"(?P<COMMENT>//[^\n]*)|"#,
         r#"(?P<DEFINE>let)|"#,
         r#"(?P<MUTABLE>mut)|"#,
         r#"(?P<FUNCTION>func)|"#,
@@ -37,9 +39,6 @@ pub mod lexer {
         r#"(?P<OPENBRACE>\[)|"#,
         r#"(?P<CLOSEBRACE>\])|"#,
         r#"(?P<ENDLINE>;)"#,
-        r#"(?P<WHITESPACE>\s+)|"#,
-        r#"(?P<COMMENT>//[^\n]*)|"#,
-        r#"(?i)"#
     );
 
     #[derive(Debug)]
@@ -191,7 +190,14 @@ pub mod lexer {
             let mut tokens: Vec<Token> = Vec::new();
             for caps in search.captures_iter(&source) {
                 tokens.push(match () {
-                    
+                    _ if matches!(caps.name("COMMENT"), Some(_)) => Self {
+                        kind: TokenKind::Ignore,
+                        text: caps.name("COMMENT").unwrap().as_str().to_string(),
+                    },
+                    _ if matches!(caps.name("WHITESPACE"), Some(_)) => Self {
+                        kind: TokenKind::Ignore,
+                        text: String::default(),
+                    },
                     _ if matches!(caps.name("DEFINE"), Some(_)) => Self {
                         kind: TokenKind::Keyword(Keywords::Define),
                         text: "let".to_string(),
@@ -221,7 +227,7 @@ pub mod lexer {
                         text: caps.name("PUBLICITY").unwrap().as_str().to_string(),
                     },
                     _ if matches!(caps.name("NULL"), Some(_)) => Self {
-                        kind: TokenKind::Type,
+                        kind: TokenKind::Keyword(Keywords::Null),
                         text: caps.name("NULL").unwrap().as_str().to_string(),
                     },
                     _ if matches!(caps.name("RETURN"), Some(_)) => Self {
@@ -305,14 +311,7 @@ pub mod lexer {
                         kind: TokenKind::Operator(Operators::EndLine),
                         text: ";".to_string(),
                     },
-                    _ if matches!(caps.name("WHITESPACE"), Some(_)) => Self {
-                        kind: TokenKind::Ignore,
-                        text: String::default(),
-                    },
-                    _ if matches!(caps.name("COMMENT"), Some(_)) => Self {
-                        kind: TokenKind::Ignore,
-                        text: caps.name("COMMENT").unwrap().as_str().to_string(),
-                    },
+                    
                     () => Self {
                         kind: TokenKind::Unknown,
                         text: "wtf".to_string()
