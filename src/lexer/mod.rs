@@ -68,8 +68,6 @@ pub mod lexer {
         Define,   // let
         Mutable,  // mut
         Function, // func
-        // Todo: Figure this out
-        // Type(String), // int, float, double
         If,        // if
         Else,      // else
         While,     // while
