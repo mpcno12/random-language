@@ -59,8 +59,6 @@ pub mod lexer {
         OpenBrace,    // [
         CloseBrace,   // ]
         EndLine,      // ;
-                      // TODO: Figure this out.
-                      // Binary([char; 2]), // e.g. << , >> , | , & , etc...
     }
 
     #[derive(Debug)]
